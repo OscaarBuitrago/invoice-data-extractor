@@ -1,0 +1,9 @@
+[phases.build]
+cmds = [
+    "composer install --no-dev --optimize-autoloader",
+    "npm ci",
+    "npm run build"
+]
+
+[start]
+cmd = "bash start.sh"
