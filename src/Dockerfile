@@ -1,0 +1,61 @@
+FROM php:8.3-cli-alpine
+
+# System dependencies
+RUN apk add --no-cache \
+    nodejs \
+    npm \
+    git \
+    zip \
+    unzip \
+    libpng-dev \
+    libxml2-dev \
+    oniguruma-dev \
+    curl-dev \
+    icu-dev \
+    linux-headers
+
+# PHP extensions
+RUN docker-php-ext-configure gd \
+    && docker-php-ext-install -j$(nproc) \
+        bcmath \
+        gd \
+        mbstring \
+        pdo \
+        pdo_mysql \
+        tokenizer \
+        xml \
+        zip \
+        intl \
+        pcntl
+
+# Composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+WORKDIR /app
+
+# Composer deps (layer cache)
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --optimize-autoloader --no-scripts
+
+# NPM deps (layer cache)
+COPY package.json package-lock.json ./
+RUN npm ci
+
+# Application
+COPY . .
+
+# Build frontend
+RUN npm run build
+
+# Finalize composer
+RUN composer dump-autoload --optimize
+
+RUN chmod +x start.sh worker.sh
+
+# Storage permissions
+RUN mkdir -p storage/app/private storage/framework/cache storage/framework/sessions storage/framework/views storage/logs \
+    && chmod -R 775 storage bootstrap/cache
+
+EXPOSE 8000
+
+CMD ["bash", "start.sh"]
