@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Web\ClientCompanies\ClientCompanyController;
 use App\Http\Controllers\Web\Consultancies\ConsultancyController;
 use App\Http\Controllers\Web\Context\CompanyContextController;
+use App\Http\Controllers\Web\Exports\SageExportController;
 use App\Http\Controllers\Web\Invoices\InvoiceController;
 use App\Http\Controllers\Web\Invoices\UploadBatchController;
 use App\Http\Controllers\Web\Users\UserController;
@@ -40,6 +41,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('client-companies', ClientCompanyController::class)->only(['index', 'create', 'store']);
 
     Route::middleware(RequiresCompanyContext::class)->group(function (): void {
+        Route::post('/sage-exports', [SageExportController::class, 'store'])->name('sage-exports.store');
         Route::get('/invoices', [InvoiceController::class, 'index'])->name('invoices.index');
         Route::get('/invoices/upload', [UploadBatchController::class, 'create'])->name('invoices.upload.create');
         Route::post('/invoices/upload', [UploadBatchController::class, 'store'])->name('invoices.upload.store');

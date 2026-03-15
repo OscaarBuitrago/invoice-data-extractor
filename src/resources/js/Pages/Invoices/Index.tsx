@@ -50,6 +50,9 @@ const VALIDATION_LABELS: Record<string, string> = {
 const fmt = (n: number | null) =>
     n !== null ? n.toLocaleString('es-ES', { minimumFractionDigits: 2 }) + ' €' : '—';
 
+const fmtDate = (d: string | null) =>
+    d ? new Date(d).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '—';
+
 export default function InvoicesIndex({ invoices, filters }: Props) {
     const [selected, setSelected] = useState<Set<string>>(new Set());
     const [localFilters, setLocalFilters] = useState(filters);
@@ -220,7 +223,7 @@ export default function InvoicesIndex({ invoices, filters }: Props) {
                                                 className="rounded border-gray-300 text-indigo-600"
                                             />
                                         </td>
-                                        <td className={tdCls}>{invoice.invoice_date ?? '—'}</td>
+                                        <td className={tdCls}>{fmtDate(invoice.invoice_date)}</td>
                                         <td className={tdCls}>{invoice.invoice_number ?? '—'}</td>
                                         <td className="px-4 py-3 text-sm text-gray-700">
                                             <div className="font-medium">{invoice.issuer_name ?? '—'}</div>
@@ -287,6 +290,32 @@ export default function InvoicesIndex({ invoices, filters }: Props) {
                             {selected.size} {selected.size === 1 ? 'factura seleccionada' : 'facturas seleccionadas'}
                         </span>
                         <div className="h-4 w-px bg-gray-600" />
+                        <button
+                            onClick={() => {
+                                const form = document.createElement('form');
+                                form.method = 'POST';
+                                form.action = route('sage-exports.store');
+                                const csrf = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ?? '';
+                                const csrfInput = document.createElement('input');
+                                csrfInput.type = 'hidden';
+                                csrfInput.name = '_token';
+                                csrfInput.value = csrf;
+                                form.appendChild(csrfInput);
+                                [...selected].forEach((id) => {
+                                    const input = document.createElement('input');
+                                    input.type = 'hidden';
+                                    input.name = 'invoice_ids[]';
+                                    input.value = id;
+                                    form.appendChild(input);
+                                });
+                                document.body.appendChild(form);
+                                form.submit();
+                                document.body.removeChild(form);
+                            }}
+                            className="rounded-md bg-indigo-500 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-400"
+                        >
+                            Exportar a SAGE
+                        </button>
                         <button
                             onClick={() => setSelected(new Set())}
                             className="text-sm text-gray-400 hover:text-white"
