@@ -5,12 +5,15 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Web\Invoices;
 
 use App\Actions\Invoices\GetNextPendingInvoiceAction;
+use App\Actions\Invoices\ListInvoicesAction;
 use App\Actions\Invoices\RejectInvoiceAction;
 use App\Actions\Invoices\ValidateInvoiceAction;
+use App\Data\InvoiceFiltersData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Invoices\UpdateInvoiceRequest;
 use App\Models\Invoice;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -18,6 +21,18 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class InvoiceController extends Controller
 {
+    public function index(Request $request, ListInvoicesAction $action): Response
+    {
+        $filters = InvoiceFiltersData::fromArray($request->only([
+            'type', 'validation_status', 'operation_type', 'date_from', 'date_to', 'exported_to_sage',
+        ]));
+
+        return Inertia::render('Invoices/Index', [
+            'invoices' => $action->handle($filters)->withQueryString(),
+            'filters' => $filters,
+        ]);
+    }
+
     public function show(Invoice $invoice): Response
     {
         $batch = $invoice->uploadBatch;

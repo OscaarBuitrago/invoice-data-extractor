@@ -40,6 +40,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('client-companies', ClientCompanyController::class)->only(['index', 'create', 'store']);
 
     Route::middleware(RequiresCompanyContext::class)->group(function (): void {
+        Route::get('/invoices', [InvoiceController::class, 'index'])->name('invoices.index');
         Route::get('/invoices/upload', [UploadBatchController::class, 'create'])->name('invoices.upload.create');
         Route::post('/invoices/upload', [UploadBatchController::class, 'store'])->name('invoices.upload.store');
         Route::get('/invoices/batches/{batch}/progress', [UploadBatchController::class, 'progress'])->name('invoices.batches.progress');
