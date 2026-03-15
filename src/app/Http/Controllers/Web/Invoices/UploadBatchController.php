@@ -23,7 +23,7 @@ class UploadBatchController extends Controller
 
     public function store(StoreUploadBatchRequest $request, CreateUploadBatchAction $action): RedirectResponse
     {
-        $batch = $action->handle($request->file('files'));
+        $batch = $action->handle($request->file('files'), $request->validated()['type']);
 
         foreach ($batch->invoices as $invoice) {
             ProcessInvoiceOcrJob::dispatch($invoice);
@@ -34,8 +34,21 @@ class UploadBatchController extends Controller
 
     public function progress(UploadBatch $batch): Response
     {
+        $firstInvoice = $batch->invoices()
+            ->where('ocr_status', \App\Enums\OcrStatus::Completed)
+            ->orderBy('created_at')
+            ->first();
+
+        $duplicateFiles = $batch->invoices()
+            ->where('ocr_status', \App\Enums\OcrStatus::Duplicate)
+            ->pluck('file_name');
+
         return Inertia::render('Invoices/Progress', [
-            'batch' => $batch->only(['id', 'total_invoices', 'processed_invoices', 'status']),
+            'batch' => array_merge(
+                $batch->only(['id', 'total_invoices', 'processed_invoices', 'status']),
+                ['duplicate_files' => $duplicateFiles],
+            ),
+            'firstInvoiceId' => $firstInvoice?->id,
         ]);
     }
 
@@ -47,11 +60,16 @@ class UploadBatchController extends Controller
             abort(403);
         }
 
+        $duplicates = $batch->invoices()
+            ->where('ocr_status', \App\Enums\OcrStatus::Duplicate)
+            ->pluck('file_name');
+
         return response()->json([
             'id' => $batch->id,
             'status' => $batch->status,
             'total_invoices' => $batch->total_invoices,
             'processed_invoices' => $batch->processed_invoices,
+            'duplicate_files' => $duplicates,
         ]);
     }
 }

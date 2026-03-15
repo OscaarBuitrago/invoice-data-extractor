@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\InvoiceType;
 use App\Enums\ValidationStatus;
 use App\Models\ClientCompany;
 use App\Models\Consultancy;
@@ -28,6 +29,8 @@ function validPayload(): array
         'invoice_number' => 'FAC-001',
         'issuer_tax_id' => 'B12345678',
         'issuer_name' => 'Proveedor S.L.',
+        'recipient_tax_id' => null,
+        'recipient_name' => null,
         'taxable_base' => 1000.00,
         'vat_percentage' => 21.00,
         'vat_amount' => 210.00,
@@ -64,12 +67,12 @@ it('renders validation page with invoice data', function (): void {
         ->assertJson(['component' => 'Invoices/Validation']);
 });
 
-it('validates required fields on update', function (): void {
+it('validates required fields on update for received invoice', function (): void {
     ['user' => $user, 'company' => $company, 'invoice' => $invoice] = makeInvoice();
     $this->actingAs($user);
     session(['active_company_id' => $company->id]);
 
-    $this->put(route('invoices.update', $invoice), ['action' => 'validate'])
+    $this->put(route('invoices.update', $invoice), ['action' => 'validate', 'type' => 'received'])
         ->assertSessionHasErrors(['invoice_date', 'invoice_number', 'issuer_tax_id', 'taxable_base', 'total']);
 });
 
@@ -116,4 +119,35 @@ it('returns 404 if invoice belongs to another consultancy', function (): void {
     session(['active_company_id' => $otherCompany->id]);
 
     $this->get(route('invoices.show', $invoice))->assertNotFound();
+});
+
+it('validates issued invoice with recipient fields', function (): void {
+    ['user' => $user, 'company' => $company, 'invoice' => $invoice] = makeInvoice(['type' => InvoiceType::Issued]);
+    $this->actingAs($user);
+    session(['active_company_id' => $company->id]);
+
+    $payload = [
+        'action' => 'validate',
+        'invoice_date' => '2024-03-01',
+        'invoice_number' => 'FAC-001',
+        'issuer_tax_id' => null,
+        'issuer_name' => null,
+        'recipient_tax_id' => 'A87654321',
+        'recipient_name' => 'Cliente S.A.',
+        'taxable_base' => 1000.00,
+        'vat_percentage' => 21.00,
+        'vat_amount' => 210.00,
+        'irpf_percentage' => null,
+        'irpf_amount' => null,
+        'total' => 1210.00,
+        'type' => 'issued',
+        'operation_type' => 'normal',
+        'validation_notes' => null,
+    ];
+
+    $this->put(route('invoices.update', $invoice), $payload)
+        ->assertRedirect();
+
+    expect($invoice->fresh()->validation_status)->toBe(ValidationStatus::Validated)
+        ->and($invoice->fresh()->recipient_tax_id)->toBe('A87654321');
 });

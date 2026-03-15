@@ -30,6 +30,8 @@ interface InvoiceData {
     invoice_number: string | null;
     issuer_tax_id: string | null;
     issuer_name: string | null;
+    recipient_tax_id: string | null;
+    recipient_name: string | null;
     taxable_base: number | null;
     vat_percentage: number | null;
     vat_amount: number | null;
@@ -75,6 +77,8 @@ export default function Validation({ invoice, pdfUrl, batch, batchInvoices }: Pr
         invoice_number: invoice.invoice_number ?? '',
         issuer_tax_id: invoice.issuer_tax_id ?? '',
         issuer_name: invoice.issuer_name ?? '',
+        recipient_tax_id: invoice.recipient_tax_id ?? '',
+        recipient_name: invoice.recipient_name ?? '',
         taxable_base: invoice.taxable_base ?? '',
         vat_percentage: invoice.vat_percentage ?? '',
         vat_amount: invoice.vat_amount ?? '',
@@ -85,6 +89,29 @@ export default function Validation({ invoice, pdfUrl, batch, batchInvoices }: Pr
         operation_type: invoice.operation_type ?? 'normal',
         validation_notes: invoice.validation_notes ?? '',
     });
+
+    useEffect(() => {
+        setData({
+            action: 'validate',
+            invoice_date: invoice.invoice_date ?? '',
+            invoice_number: invoice.invoice_number ?? '',
+            issuer_tax_id: invoice.issuer_tax_id ?? '',
+            issuer_name: invoice.issuer_name ?? '',
+            recipient_tax_id: invoice.recipient_tax_id ?? '',
+            recipient_name: invoice.recipient_name ?? '',
+            taxable_base: invoice.taxable_base ?? '',
+            vat_percentage: invoice.vat_percentage ?? '',
+            vat_amount: invoice.vat_amount ?? '',
+            irpf_percentage: invoice.irpf_percentage ?? '',
+            irpf_amount: invoice.irpf_amount ?? '',
+            total: invoice.total ?? '',
+            type: invoice.type ?? 'received',
+            operation_type: invoice.operation_type ?? 'normal',
+            validation_notes: invoice.validation_notes ?? '',
+        });
+    }, [invoice.id]);
+
+    const isReceived = data.type === 'received';
 
     const submit = (action: 'validate' | 'reject') => {
         setData('action', action);
@@ -208,13 +235,25 @@ export default function Validation({ invoice, pdfUrl, batch, batchInvoices }: Pr
                             <input type="text" value={data.invoice_number} onChange={(e) => setData('invoice_number', e.target.value)} className={inputCls(!!errors.invoice_number)} />
                         </Field>
 
-                        <Field label="CIF Emisor" error={errors.issuer_tax_id}>
-                            <input type="text" value={data.issuer_tax_id} onChange={(e) => setData('issuer_tax_id', e.target.value)} className={inputCls(!!errors.issuer_tax_id)} />
-                        </Field>
-
-                        <Field label="Nombre Emisor">
-                            <input type="text" value={data.issuer_name} onChange={(e) => setData('issuer_name', e.target.value)} className={inputCls(false)} />
-                        </Field>
+                        {isReceived ? (
+                            <>
+                                <Field label="CIF Emisor" error={errors.issuer_tax_id}>
+                                    <input type="text" value={data.issuer_tax_id} onChange={(e) => setData('issuer_tax_id', e.target.value)} className={inputCls(!!errors.issuer_tax_id)} />
+                                </Field>
+                                <Field label="Nombre Emisor">
+                                    <input type="text" value={data.issuer_name} onChange={(e) => setData('issuer_name', e.target.value)} className={inputCls(false)} />
+                                </Field>
+                            </>
+                        ) : (
+                            <>
+                                <Field label="CIF Receptor" error={errors.recipient_tax_id}>
+                                    <input type="text" value={data.recipient_tax_id} onChange={(e) => setData('recipient_tax_id', e.target.value)} className={inputCls(!!errors.recipient_tax_id)} />
+                                </Field>
+                                <Field label="Nombre Receptor">
+                                    <input type="text" value={data.recipient_name} onChange={(e) => setData('recipient_name', e.target.value)} className={inputCls(false)} />
+                                </Field>
+                            </>
+                        )}
 
                         <div className="grid grid-cols-2 gap-3">
                             <Field label="Base imponible" error={errors.taxable_base}>
@@ -255,20 +294,13 @@ export default function Validation({ invoice, pdfUrl, batch, batchInvoices }: Pr
                     </form>
 
                     {/* Actions */}
-                    <div className="border-t border-gray-100 p-4 space-y-2">
+                    <div className="border-t border-gray-100 p-4">
                         <button
                             onClick={() => submit('validate')}
                             disabled={processing}
                             className="w-full rounded-md bg-indigo-600 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
                         >
                             Confirmar y siguiente <kbd className="ml-1 rounded bg-indigo-500 px-1 text-xs">↵</kbd>
-                        </button>
-                        <button
-                            onClick={() => submit('reject')}
-                            disabled={processing}
-                            className="w-full rounded-md border border-gray-300 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-                        >
-                            Rechazar
                         </button>
                     </div>
                 </div>

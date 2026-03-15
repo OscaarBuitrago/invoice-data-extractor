@@ -28,7 +28,7 @@ it('creates upload batch with correct data', function (): void {
         UploadedFile::fake()->create('factura2.pdf', 100, 'application/pdf'),
     ];
 
-    $batch = app(CreateUploadBatchAction::class)->handle($files);
+    $batch = app(CreateUploadBatchAction::class)->handle($files, 'received');
 
     expect($batch->consultancy_id)->toBe($consultancy->id)
         ->and($batch->client_company_id)->toBe($company->id)
@@ -51,7 +51,7 @@ it('creates one invoice per uploaded file', function (): void {
         UploadedFile::fake()->create('factura3.pdf', 100, 'application/pdf'),
     ];
 
-    $batch = app(CreateUploadBatchAction::class)->handle($files);
+    $batch = app(CreateUploadBatchAction::class)->handle($files, 'received');
 
     expect($batch->invoices)->toHaveCount(3);
 
@@ -70,7 +70,7 @@ it('stores files and saves correct file names', function (): void {
 
     $file = UploadedFile::fake()->create('mi-factura.pdf', 100, 'application/pdf');
 
-    $batch = app(CreateUploadBatchAction::class)->handle([$file]);
+    $batch = app(CreateUploadBatchAction::class)->handle([$file], 'received');
 
     $invoice = $batch->invoices->first();
 
@@ -78,4 +78,18 @@ it('stores files and saves correct file names', function (): void {
         ->and($invoice->file_path)->not->toBeEmpty();
 
     Storage::disk('local')->assertExists($invoice->file_path);
+});
+
+it('assigns type to each invoice', function (): void {
+    $consultancy = Consultancy::factory()->create();
+    $user = User::factory()->consultant()->for($consultancy)->create();
+    $company = ClientCompany::factory()->for($consultancy)->create();
+    $this->actingAs($user);
+    session(['active_company_id' => $company->id]);
+
+    $files = [UploadedFile::fake()->create('factura.pdf', 100, 'application/pdf')];
+
+    $batch = app(CreateUploadBatchAction::class)->handle($files, 'issued');
+
+    expect($batch->invoices->first()->type->value)->toBe('issued');
 });

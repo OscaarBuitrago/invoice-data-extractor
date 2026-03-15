@@ -27,6 +27,32 @@ it('requires company context to upload', function (): void {
         ->assertRedirect(route('context.select'));
 });
 
+it('validates type is required', function (): void {
+    $consultancy = Consultancy::factory()->create();
+    $user = User::factory()->consultant()->for($consultancy)->create();
+    $company = ClientCompany::factory()->for($consultancy)->create();
+    $this->actingAs($user);
+    session(['active_company_id' => $company->id]);
+
+    $files = [UploadedFile::fake()->create('factura.pdf', 100, 'application/pdf')];
+
+    $this->post(route('invoices.upload.store'), ['files' => $files])
+        ->assertSessionHasErrors('type');
+});
+
+it('validates type must be issued or received', function (): void {
+    $consultancy = Consultancy::factory()->create();
+    $user = User::factory()->consultant()->for($consultancy)->create();
+    $company = ClientCompany::factory()->for($consultancy)->create();
+    $this->actingAs($user);
+    session(['active_company_id' => $company->id]);
+
+    $files = [UploadedFile::fake()->create('factura.pdf', 100, 'application/pdf')];
+
+    $this->post(route('invoices.upload.store'), ['type' => 'invalid', 'files' => $files])
+        ->assertSessionHasErrors('type');
+});
+
 it('validates at least one file is required', function (): void {
     $consultancy = Consultancy::factory()->create();
     $user = User::factory()->consultant()->for($consultancy)->create();
@@ -34,7 +60,7 @@ it('validates at least one file is required', function (): void {
     $this->actingAs($user);
     session(['active_company_id' => $company->id]);
 
-    $this->post(route('invoices.upload.store'), [])
+    $this->post(route('invoices.upload.store'), ['type' => 'received'])
         ->assertSessionHasErrors('files');
 });
 
@@ -47,7 +73,7 @@ it('validates maximum 20 files', function (): void {
 
     $files = array_fill(0, 21, UploadedFile::fake()->create('f.pdf', 100, 'application/pdf'));
 
-    $this->post(route('invoices.upload.store'), ['files' => $files])
+    $this->post(route('invoices.upload.store'), ['type' => 'received', 'files' => $files])
         ->assertSessionHasErrors('files');
 });
 
@@ -60,7 +86,7 @@ it('validates maximum file size of 10mb', function (): void {
 
     $files = [UploadedFile::fake()->create('large.pdf', 11000, 'application/pdf')];
 
-    $this->post(route('invoices.upload.store'), ['files' => $files])
+    $this->post(route('invoices.upload.store'), ['type' => 'received', 'files' => $files])
         ->assertSessionHasErrors('files.0');
 });
 
@@ -73,7 +99,7 @@ it('validates files must be pdfs', function (): void {
 
     $files = [UploadedFile::fake()->create('image.jpg', 100, 'image/jpeg')];
 
-    $this->post(route('invoices.upload.store'), ['files' => $files])
+    $this->post(route('invoices.upload.store'), ['type' => 'received', 'files' => $files])
         ->assertSessionHasErrors('files.0');
 });
 
@@ -89,7 +115,7 @@ it('creates batch and dispatches jobs on valid upload', function (): void {
         UploadedFile::fake()->create('factura2.pdf', 100, 'application/pdf'),
     ];
 
-    $response = $this->post(route('invoices.upload.store'), ['files' => $files]);
+    $response = $this->post(route('invoices.upload.store'), ['type' => 'received', 'files' => $files]);
 
     $batch = UploadBatch::withoutGlobalScopes()->latest()->first();
 

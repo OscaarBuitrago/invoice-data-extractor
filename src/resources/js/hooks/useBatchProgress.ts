@@ -7,6 +7,7 @@ export interface BatchProgress {
     status: BatchStatus;
     total_invoices: number;
     processed_invoices: number;
+    duplicate_files: string[];
 }
 
 export function useBatchProgress(batchId: string, initialStatus: BatchStatus) {

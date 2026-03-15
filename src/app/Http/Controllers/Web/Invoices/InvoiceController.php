@@ -24,7 +24,7 @@ class InvoiceController extends Controller
     public function index(Request $request, ListInvoicesAction $action): Response
     {
         $filters = InvoiceFiltersData::fromArray($request->only([
-            'type', 'validation_status', 'operation_type', 'date_from', 'date_to', 'exported_to_sage',
+            'type', 'validation_status', 'operation_type', 'date_from', 'date_to', 'exported_to_sage', 'invoice_number',
         ]));
 
         return Inertia::render('Invoices/Index', [
@@ -47,6 +47,7 @@ class InvoiceController extends Controller
                 ...$invoice->only([
                     'id', 'file_name', 'ocr_confidence', 'ocr_status', 'validation_status',
                     'invoice_date', 'invoice_number', 'issuer_tax_id', 'issuer_name',
+                    'recipient_tax_id', 'recipient_name',
                     'taxable_base', 'vat_percentage', 'vat_amount',
                     'irpf_percentage', 'irpf_amount', 'total',
                     'type', 'operation_type', 'validation_notes',
@@ -57,6 +58,14 @@ class InvoiceController extends Controller
             'batch' => $batch->only(['id', 'total_invoices']),
             'batchInvoices' => $batchInvoices,
         ]);
+    }
+
+    public function destroy(Invoice $invoice): RedirectResponse
+    {
+        Storage::disk('local')->delete($invoice->file_path);
+        $invoice->delete();
+
+        return redirect()->route('invoices.index');
     }
 
     public function pdf(Invoice $invoice): BinaryFileResponse
@@ -83,6 +92,6 @@ class InvoiceController extends Controller
 
         return $next instanceof Invoice
             ? redirect()->route('invoices.show', $next)
-            : redirect()->route('dashboard');
+            : redirect()->route('invoices.index');
     }
 }

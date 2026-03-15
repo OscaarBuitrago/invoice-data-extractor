@@ -13,13 +13,14 @@ interface FileError {
 }
 
 export default function Upload(_props: PageProps) {
+    const [type, setType] = useState<'received' | 'issued' | null>(null);
     const [files, setFiles] = useState<File[]>([]);
     const [errors, setErrors] = useState<FileError[]>([]);
     const [dragging, setDragging] = useState(false);
     const [uploading, setUploading] = useState(false);
     const inputRef = useRef<HTMLInputElement>(null);
 
-    const validate = (incoming: File[]): { valid: File[]; errors: FileError[] } => {
+    const validate = (incoming: File[]): { valid: File[]; errs: FileError[] } => {
         const errs: FileError[] = [];
         const valid: File[] = [];
 
@@ -69,10 +70,11 @@ export default function Upload(_props: PageProps) {
     const removeFile = (index: number) => setFiles(files.filter((_, i) => i !== index));
 
     const submit = () => {
-        if (files.length === 0 || uploading) return;
+        if (files.length === 0 || uploading || !type) return;
         setUploading(true);
 
         const formData = new FormData();
+        formData.append('type', type);
         files.forEach((f) => formData.append('files[]', f));
 
         router.post(route('invoices.upload.store'), formData, {
@@ -93,38 +95,71 @@ export default function Upload(_props: PageProps) {
             <div className="py-12">
                 <div className="mx-auto max-w-3xl sm:px-6 lg:px-8 space-y-6">
 
-                    {/* Drop zone */}
-                    <div
-                        onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
-                        onDragLeave={() => setDragging(false)}
-                        onDrop={handleDrop}
-                        onClick={() => inputRef.current?.click()}
-                        className={`flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-12 transition ${
-                            dragging
-                                ? 'border-indigo-500 bg-indigo-50'
-                                : 'border-gray-300 bg-white hover:border-indigo-400 hover:bg-gray-50'
-                        }`}
-                    >
-                        <svg className="mb-3 h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
-                                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                        </svg>
-                        <p className="text-sm font-medium text-gray-700">
-                            Arrastra los PDFs aquí o{' '}
-                            <span className="text-indigo-600">haz clic para seleccionar</span>
-                        </p>
-                        <p className="mt-1 text-xs text-gray-500">
-                            Solo PDF · máx. {MAX_SIZE_MB} MB por archivo · máx. {MAX_FILES} archivos
-                        </p>
-                        <input
-                            ref={inputRef}
-                            type="file"
-                            multiple
-                            accept="application/pdf"
-                            className="hidden"
-                            onChange={handleChange}
-                        />
+                    {/* Tipo de factura */}
+                    <div className="rounded-lg bg-white p-6 shadow-sm">
+                        <p className="mb-3 text-sm font-medium text-gray-700">¿Qué tipo de facturas vas a subir?</p>
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => setType('received')}
+                                className={`flex-1 rounded-lg border-2 px-4 py-3 text-sm font-medium transition ${
+                                    type === 'received'
+                                        ? 'border-indigo-600 bg-indigo-50 text-indigo-700'
+                                        : 'border-gray-200 text-gray-600 hover:border-indigo-300 hover:bg-gray-50'
+                                }`}
+                            >
+                                <span className="block text-base">📥</span>
+                                Recibidas
+                                <span className="mt-0.5 block text-xs font-normal text-gray-400">Facturas de proveedores</span>
+                            </button>
+                            <button
+                                onClick={() => setType('issued')}
+                                className={`flex-1 rounded-lg border-2 px-4 py-3 text-sm font-medium transition ${
+                                    type === 'issued'
+                                        ? 'border-indigo-600 bg-indigo-50 text-indigo-700'
+                                        : 'border-gray-200 text-gray-600 hover:border-indigo-300 hover:bg-gray-50'
+                                }`}
+                            >
+                                <span className="block text-base">📤</span>
+                                Emitidas
+                                <span className="mt-0.5 block text-xs font-normal text-gray-400">Facturas a clientes</span>
+                            </button>
+                        </div>
                     </div>
+
+                    {/* Drop zone — solo visible si se ha elegido tipo */}
+                    {type && (
+                        <div
+                            onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+                            onDragLeave={() => setDragging(false)}
+                            onDrop={handleDrop}
+                            onClick={() => inputRef.current?.click()}
+                            className={`flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-12 transition ${
+                                dragging
+                                    ? 'border-indigo-500 bg-indigo-50'
+                                    : 'border-gray-300 bg-white hover:border-indigo-400 hover:bg-gray-50'
+                            }`}
+                        >
+                            <svg className="mb-3 h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                                    d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                            </svg>
+                            <p className="text-sm font-medium text-gray-700">
+                                Arrastra los PDFs aquí o{' '}
+                                <span className="text-indigo-600">haz clic para seleccionar</span>
+                            </p>
+                            <p className="mt-1 text-xs text-gray-500">
+                                Solo PDF · máx. {MAX_SIZE_MB} MB por archivo · máx. {MAX_FILES} archivos
+                            </p>
+                            <input
+                                ref={inputRef}
+                                type="file"
+                                multiple
+                                accept="application/pdf"
+                                className="hidden"
+                                onChange={handleChange}
+                            />
+                        </div>
+                    )}
 
                     {/* Validation errors */}
                     {errors.length > 0 && (
@@ -177,7 +212,7 @@ export default function Upload(_props: PageProps) {
                     <div className="flex justify-end">
                         <button
                             onClick={submit}
-                            disabled={files.length === 0 || uploading}
+                            disabled={files.length === 0 || uploading || !type}
                             className="rounded-md bg-indigo-600 px-6 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
                         >
                             {uploading ? 'Subiendo...' : `Subir ${files.length > 0 ? files.length : ''} factura${files.length !== 1 ? 's' : ''}`}

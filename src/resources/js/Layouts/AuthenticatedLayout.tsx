@@ -1,4 +1,3 @@
-import ApplicationLogo from '@/Components/ApplicationLogo';
 import Dropdown from '@/Components/Dropdown';
 import NavLink from '@/Components/NavLink';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
@@ -22,17 +21,17 @@ export default function Authenticated({
                     <div className="flex h-16 justify-between">
                         <div className="flex">
                             <div className="flex shrink-0 items-center">
-                                <Link href="/">
-                                    <ApplicationLogo className="block h-9 w-auto fill-current text-gray-800" />
+                                <Link href={route('invoices.index')}>
+                                    <img src="/logo.png" alt="Logo" className="h-20 w-auto" />
                                 </Link>
                             </div>
 
                             <div className="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                                 <NavLink
-                                    href={route('dashboard')}
-                                    active={route().current('dashboard')}
+                                    href={route('invoices.index')}
+                                    active={route().current('invoices.index')}
                                 >
-                                    Dashboard
+                                    Facturas
                                 </NavLink>
                             </div>
                         </div>
@@ -144,10 +143,10 @@ export default function Authenticated({
                 >
                     <div className="space-y-1 pb-3 pt-2">
                         <ResponsiveNavLink
-                            href={route('dashboard')}
-                            active={route().current('dashboard')}
+                            href={route('invoices.index')}
+                            active={route().current('invoices.index')}
                         >
-                            Dashboard
+                            Facturas
                         </ResponsiveNavLink>
                     </div>
 

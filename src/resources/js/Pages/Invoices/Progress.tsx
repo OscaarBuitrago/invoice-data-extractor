@@ -8,10 +8,12 @@ interface Batch {
     status: BatchStatus;
     total_invoices: number;
     processed_invoices: number;
+    duplicate_files: string[];
 }
 
 interface Props extends PageProps {
     batch: Batch;
+    firstInvoiceId: string | null;
 }
 
 const STATUS_LABEL: Record<BatchStatus, string> = {
@@ -26,9 +28,9 @@ const STATUS_COLOR: Record<BatchStatus, string> = {
     with_errors: 'bg-yellow-500',
 };
 
-export default function Progress({ batch: initialBatch }: Props) {
+export default function Progress({ batch: initialBatch, firstInvoiceId }: Props) {
     const polled = useBatchProgress(initialBatch.id, initialBatch.status);
-    const batch = polled ?? initialBatch;
+    const batch = polled ?? { ...initialBatch, duplicate_files: initialBatch.duplicate_files ?? [] };
 
     const percentage =
         batch.total_invoices > 0
@@ -81,18 +83,41 @@ export default function Progress({ batch: initialBatch }: Props) {
 
                         {/* Actions */}
                         {isDone && (
-                            <div className="flex gap-3 pt-2">
-                                {batch.status === 'with_errors' && (
-                                    <p className="text-sm text-yellow-700">
-                                        Algunas facturas no pudieron procesarse. Puedes revisarlas en el listado.
-                                    </p>
+                            <div className="space-y-3 pt-2">
+                                {batch.duplicate_files.length > 0 && (
+                                    <div className="rounded-lg border border-orange-200 bg-orange-50 p-3">
+                                        <p className="text-sm font-medium text-orange-800">
+                                            {batch.duplicate_files.length === 1
+                                                ? 'La siguiente factura ya existe y no ha sido procesada:'
+                                                : `Las siguientes ${batch.duplicate_files.length} facturas ya existen y no han sido procesadas:`}
+                                        </p>
+                                        <ul className="mt-2 space-y-1">
+                                            {batch.duplicate_files.map((name) => (
+                                                <li key={name} className="flex items-center gap-2 text-sm text-orange-700">
+                                                    <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 17.25 12 21m0 0-3.75-3.75M12 21V3" />
+                                                    </svg>
+                                                    {name}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
                                 )}
-                                <Link
-                                    href={route('dashboard')}
-                                    className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
-                                >
-                                    Ir al inicio
-                                </Link>
+                                {firstInvoiceId ? (
+                                    <Link
+                                        href={route('invoices.show', firstInvoiceId)}
+                                        className="block w-full rounded-md bg-indigo-600 px-4 py-2 text-center text-sm font-medium text-white hover:bg-indigo-700"
+                                    >
+                                        Revisar facturas →
+                                    </Link>
+                                ) : (
+                                    <Link
+                                        href={route('invoices.index')}
+                                        className="block w-full rounded-md bg-indigo-600 px-4 py-2 text-center text-sm font-medium text-white hover:bg-indigo-700"
+                                    >
+                                        Ver listado
+                                    </Link>
+                                )}
                             </div>
                         )}
 

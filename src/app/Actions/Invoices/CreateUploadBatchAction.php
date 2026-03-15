@@ -14,12 +14,12 @@ use Illuminate\Support\Facades\DB;
 
 class CreateUploadBatchAction
 {
-    public function handle(array $files): UploadBatch
+    public function handle(array $files, string $type): UploadBatch
     {
         $user = auth()->user();
         $clientCompanyId = session('active_company_id');
 
-        return DB::transaction(function () use ($files, $user, $clientCompanyId): UploadBatch {
+        return DB::transaction(function () use ($files, $type, $user, $clientCompanyId): UploadBatch {
             $batch = UploadBatch::create([
                 'consultancy_id' => $user->consultancy_id,
                 'client_company_id' => $clientCompanyId,
@@ -40,6 +40,7 @@ class CreateUploadBatchAction
                     'user_id' => $user->id,
                     'file_path' => $path,
                     'file_name' => $file->getClientOriginalName(),
+                    'type' => $type,
                     'ocr_status' => OcrStatus::Pending,
                     'validation_status' => ValidationStatus::Pending,
                 ]);

@@ -17,12 +17,16 @@ class UpdateInvoiceRequest extends FormRequest
             ];
         }
 
+        $isReceived = $this->input('type') === 'received';
+
         return [
             'action' => ['required', 'in:validate,reject'],
             'invoice_date' => ['required', 'date'],
             'invoice_number' => ['required', 'string', 'max:100'],
-            'issuer_tax_id' => ['required', 'string', 'max:20'],
+            'issuer_tax_id' => [$isReceived ? 'required' : 'nullable', 'string', 'max:20'],
             'issuer_name' => ['nullable', 'string', 'max:255'],
+            'recipient_tax_id' => [$isReceived ? 'nullable' : 'required', 'string', 'max:20'],
+            'recipient_name' => ['nullable', 'string', 'max:255'],
             'taxable_base' => ['required', 'numeric', 'min:0'],
             'vat_percentage' => ['nullable', 'numeric', 'min:0', 'max:100'],
             'vat_amount' => ['nullable', 'numeric', 'min:0'],

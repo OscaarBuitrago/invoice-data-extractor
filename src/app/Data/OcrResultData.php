@@ -11,6 +11,8 @@ readonly class OcrResultData
         public ?string $invoiceNumber,
         public ?string $issuerTaxId,
         public ?string $issuerName,
+        public ?string $recipientTaxId,
+        public ?string $recipientName,
         public ?float $taxableBase,
         public ?float $vatPercentage,
         public ?float $vatAmount,

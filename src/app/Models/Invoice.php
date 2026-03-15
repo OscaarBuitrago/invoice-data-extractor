@@ -39,6 +39,8 @@ class Invoice extends Model
         'invoice_number',
         'issuer_tax_id',
         'issuer_name',
+        'recipient_tax_id',
+        'recipient_name',
         'taxable_base',
         'vat_percentage',
         'vat_amount',

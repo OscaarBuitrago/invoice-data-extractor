@@ -48,6 +48,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/invoices/batches/{batch}/progress', [UploadBatchController::class, 'progress'])->name('invoices.batches.progress');
         Route::get('/invoices/{invoice}', [InvoiceController::class, 'show'])->name('invoices.show');
         Route::put('/invoices/{invoice}', [InvoiceController::class, 'update'])->name('invoices.update');
+        Route::delete('/invoices/{invoice}', [InvoiceController::class, 'destroy'])->name('invoices.destroy');
     });
 
     Route::get('/invoices/{invoice}/pdf', [InvoiceController::class, 'pdf'])->name('invoices.pdf');

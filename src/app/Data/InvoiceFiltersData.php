@@ -13,6 +13,7 @@ readonly class InvoiceFiltersData
         public ?string $dateFrom = null,
         public ?string $dateTo = null,
         public ?bool $exportedToSage = null,
+        public ?string $invoiceNumber = null,
     ) {}
 
     public static function fromArray(array $data): self
@@ -24,6 +25,7 @@ readonly class InvoiceFiltersData
             dateFrom: $data['date_from'] ?? null,
             dateTo: $data['date_to'] ?? null,
             exportedToSage: isset($data['exported_to_sage']) ? (bool) $data['exported_to_sage'] : null,
+            invoiceNumber: $data['invoice_number'] ?? null,
         );
     }
 }
