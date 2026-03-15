@@ -28,6 +28,8 @@ it('updates invoice fields when ocr succeeds', function (): void {
         taxableBase: 1000.00,
         vatPercentage: 21.00,
         vatAmount: 210.00,
+        irpfPercentage: 15.00,
+        irpfAmount: 150.00,
         total: 1210.00,
         confidence: 0.92,
         raw: ['result' => 'data'],
@@ -78,7 +80,7 @@ it('updates batch processed count after ocr', function (): void {
 
     $ocrResult = new OcrResultData(
         invoiceDate: null, invoiceNumber: null, issuerTaxId: null, issuerName: null,
-        taxableBase: null, vatPercentage: null, vatAmount: null, total: null,
+        taxableBase: null, vatPercentage: null, vatAmount: null, irpfPercentage: null, irpfAmount: null, total: null,
         confidence: 0.80, raw: [],
     );
 

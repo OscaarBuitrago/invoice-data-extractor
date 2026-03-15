@@ -93,6 +93,11 @@ class AzureFormRecognizerService
             ? round($vatAmount / $taxableBase * 100, 2)
             : null;
 
+        $irpfAmount = $this->fieldFloatValue($fields, 'TotalDiscount');
+        $irpfPercentage = $taxableBase && $irpfAmount && $taxableBase > 0
+            ? round($irpfAmount / $taxableBase * 100, 2)
+            : null;
+
         $keyConfidences = array_filter([
             $this->fieldConfidence($fields, 'InvoiceDate'),
             $this->fieldConfidence($fields, 'VendorTaxId'),
@@ -112,6 +117,8 @@ class AzureFormRecognizerService
             taxableBase: $taxableBase,
             vatPercentage: $vatPercentage,
             vatAmount: $vatAmount,
+            irpfPercentage: $irpfPercentage,
+            irpfAmount: $irpfAmount,
             total: $total,
             confidence: round($confidence, 4),
             raw: $data['analyzeResult'] ?? [],

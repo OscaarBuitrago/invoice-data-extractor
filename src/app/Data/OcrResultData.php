@@ -14,6 +14,8 @@ readonly class OcrResultData
         public ?float $taxableBase,
         public ?float $vatPercentage,
         public ?float $vatAmount,
+        public ?float $irpfPercentage,
+        public ?float $irpfAmount,
         public ?float $total,
         public float $confidence,
         public array $raw,

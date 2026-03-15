@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Web\ClientCompanies\ClientCompanyController;
 use App\Http\Controllers\Web\Consultancies\ConsultancyController;
 use App\Http\Controllers\Web\Context\CompanyContextController;
+use App\Http\Controllers\Web\Invoices\InvoiceController;
 use App\Http\Controllers\Web\Invoices\UploadBatchController;
 use App\Http\Controllers\Web\Users\UserController;
 use App\Http\Middleware\RequiresCompanyContext;
@@ -42,8 +43,11 @@ Route::middleware('auth')->group(function () {
         Route::get('/invoices/upload', [UploadBatchController::class, 'create'])->name('invoices.upload.create');
         Route::post('/invoices/upload', [UploadBatchController::class, 'store'])->name('invoices.upload.store');
         Route::get('/invoices/batches/{batch}/progress', [UploadBatchController::class, 'progress'])->name('invoices.batches.progress');
+        Route::get('/invoices/{invoice}', [InvoiceController::class, 'show'])->name('invoices.show');
+        Route::put('/invoices/{invoice}', [InvoiceController::class, 'update'])->name('invoices.update');
     });
 
+    Route::get('/invoices/{invoice}/pdf', [InvoiceController::class, 'pdf'])->name('invoices.pdf');
     Route::get('/invoices/batches/{batch}/status', [UploadBatchController::class, 'status'])->name('invoices.batches.status');
 });
 

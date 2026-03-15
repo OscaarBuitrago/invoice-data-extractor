@@ -34,6 +34,8 @@ class ProcessInvoiceOcrAction
                 'taxable_base' => $result->taxableBase,
                 'vat_percentage' => $result->vatPercentage,
                 'vat_amount' => $result->vatAmount,
+                'irpf_percentage' => $result->irpfPercentage,
+                'irpf_amount' => $result->irpfAmount,
                 'total' => $result->total,
                 'ocr_raw' => $result->raw,
             ]);
