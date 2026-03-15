@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Web\ClientCompanies\ClientCompanyController;
 use App\Http\Controllers\Web\Consultancies\ConsultancyController;
 use App\Http\Controllers\Web\Context\CompanyContextController;
+use App\Http\Controllers\Web\Invoices\UploadBatchController;
 use App\Http\Controllers\Web\Users\UserController;
 use App\Http\Middleware\RequiresCompanyContext;
 use Illuminate\Foundation\Application;
@@ -36,6 +37,14 @@ Route::middleware('auth')->group(function () {
     Route::resource('consultancies', ConsultancyController::class)->only(['index', 'create', 'store']);
     Route::resource('users', UserController::class)->only(['index', 'create', 'store', 'edit', 'update']);
     Route::resource('client-companies', ClientCompanyController::class)->only(['index', 'create', 'store']);
+
+    Route::middleware(RequiresCompanyContext::class)->group(function (): void {
+        Route::get('/invoices/upload', [UploadBatchController::class, 'create'])->name('invoices.upload.create');
+        Route::post('/invoices/upload', [UploadBatchController::class, 'store'])->name('invoices.upload.store');
+        Route::get('/invoices/batches/{batch}/progress', [UploadBatchController::class, 'progress'])->name('invoices.batches.progress');
+    });
+
+    Route::get('/invoices/batches/{batch}/status', [UploadBatchController::class, 'status'])->name('invoices.batches.status');
 });
 
 require __DIR__.'/auth.php';
