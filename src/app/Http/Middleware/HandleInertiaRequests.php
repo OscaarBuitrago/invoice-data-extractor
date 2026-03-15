@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\ClientCompany;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -19,6 +20,10 @@ class HandleInertiaRequests extends Middleware
      */
     public function version(Request $request): ?string
     {
+        if (app()->runningUnitTests()) {
+            return null;
+        }
+
         return parent::version($request);
     }
 
@@ -29,11 +34,16 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        $activeCompanyId = $request->session()->get('active_company_id');
+
         return [
             ...parent::share($request),
             'auth' => [
                 'user' => $request->user(),
             ],
+            'activeCompany' => $activeCompanyId
+                ? ClientCompany::withoutGlobalScopes()->find($activeCompanyId, ['id', 'name', 'tax_id'])
+                : null,
         ];
     }
 }

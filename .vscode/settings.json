@@ -1,0 +1,20 @@
+{
+    "editor.fontSize": 13.5,
+    "editor.lineHeight": 30,
+    "editor.fontFamily": "Menlo, Monaco, 'Courier New', monospace",
+    "editor.wordWrap": "off",
+    "editor.minimap.enabled": false, // Desactiva el minimapa para mejorar el rendimiento
+    "editor.renderWhitespace": "boundary", // Muestra espacios en blanco
+    "editor.formatOnSave": false, // Formatea automáticamente al guardar
+    "editor.formatOnType": false,
+    "files.trimTrailingWhitespace": false,
+
+    "intelephense.diagnostics.undefinedMethods": false,
+
+    "workbench.colorCustomizations": {
+        "titleBar.activeBackground": "#8533ffa1",
+        "titleBar.activeForeground": "#FFFFFF"
+    },
+
+
+}

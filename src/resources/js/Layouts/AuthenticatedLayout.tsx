@@ -9,7 +9,8 @@ export default function Authenticated({
     header,
     children,
 }: PropsWithChildren<{ header?: ReactNode }>) {
-    const user = usePage().props.auth.user;
+    const { auth, activeCompany } = usePage().props;
+    const user = auth.user;
 
     const [showingNavigationDropdown, setShowingNavigationDropdown] =
         useState(false);
@@ -36,7 +37,18 @@ export default function Authenticated({
                             </div>
                         </div>
 
-                        <div className="hidden sm:ms-6 sm:flex sm:items-center">
+                        <div className="hidden sm:ms-6 sm:flex sm:items-center gap-4">
+                            {activeCompany && (
+                                <Link
+                                    href={route('context.select')}
+                                    className="flex items-center gap-2 rounded-full bg-indigo-50 px-3 py-1.5 text-sm text-indigo-700 hover:bg-indigo-100"
+                                >
+                                    <span className="h-2 w-2 rounded-full bg-indigo-500" />
+                                    <span className="font-medium">{activeCompany.name}</span>
+                                    <span className="text-indigo-400">·</span>
+                                    <span className="text-xs text-indigo-500">{activeCompany.tax_id}</span>
+                                </Link>
+                            )}
                             <div className="relative ms-3">
                                 <Dropdown>
                                     <Dropdown.Trigger>
@@ -147,6 +159,11 @@ export default function Authenticated({
                             <div className="text-sm font-medium text-gray-500">
                                 {user.email}
                             </div>
+                            {activeCompany && (
+                                <div className="mt-1 text-sm font-medium text-indigo-600">
+                                    {activeCompany.name}
+                                </div>
+                            )}
                         </div>
 
                         <div className="mt-3 space-y-1">

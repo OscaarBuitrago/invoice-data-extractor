@@ -1,0 +1,16 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "API",
+            "type": "php",
+            "request": "launch",
+            "port": 9003,
+            "stopOnEntry": false,
+            "pathMappings": {
+                "/var/www/api": "/Users/oscaarbuitrago/Documents/GitHub/projects/api"
+            },
+            "ideKey": "VSCODE"
+        },
+    ]
+}
