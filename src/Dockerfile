@@ -8,6 +8,9 @@ RUN apk add --no-cache \
     zip \
     unzip \
     libpng-dev \
+    libjpeg-turbo-dev \
+    freetype-dev \
+    libzip-dev \
     libxml2-dev \
     oniguruma-dev \
     curl-dev \
@@ -15,7 +18,7 @@ RUN apk add --no-cache \
     linux-headers
 
 # PHP extensions
-RUN docker-php-ext-configure gd \
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) \
         bcmath \
         gd \
