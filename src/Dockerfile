@@ -49,14 +49,19 @@ COPY . .
 # Build frontend
 RUN npm run build
 
+# Create required Laravel directories
+RUN mkdir -p bootstrap/cache \
+    storage/app/private \
+    storage/framework/cache \
+    storage/framework/sessions \
+    storage/framework/views \
+    storage/logs \
+    && chmod -R 775 storage bootstrap/cache
+
 # Finalize composer
 RUN composer dump-autoload --optimize
 
 RUN chmod +x start.sh worker.sh
-
-# Storage permissions
-RUN mkdir -p storage/app/private storage/framework/cache storage/framework/sessions storage/framework/views storage/logs \
-    && chmod -R 775 storage bootstrap/cache
 
 EXPOSE 8000
 
