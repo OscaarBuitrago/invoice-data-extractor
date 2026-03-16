@@ -25,7 +25,6 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
         mbstring \
         pdo \
         pdo_mysql \
-        tokenizer \
         xml \
         zip \
         intl \
