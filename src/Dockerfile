@@ -1,21 +1,21 @@
-FROM php:8.3-cli-alpine
+FROM php:8.3-cli-bookworm
 
 # System dependencies
-RUN apk add --no-cache \
+RUN apt-get update && apt-get install -y --no-install-recommends \
     nodejs \
     npm \
     git \
     zip \
     unzip \
     libpng-dev \
-    libjpeg-turbo-dev \
-    freetype-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
     libzip-dev \
     libxml2-dev \
-    oniguruma-dev \
-    curl-dev \
-    icu-dev \
-    linux-headers
+    libonig-dev \
+    libcurl4-openssl-dev \
+    libicu-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 # PHP extensions
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
