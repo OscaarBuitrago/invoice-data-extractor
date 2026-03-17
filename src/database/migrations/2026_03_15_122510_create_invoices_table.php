@@ -10,6 +10,10 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('invoices')) {
+            return;
+        }
+
         Schema::create('invoices', function (Blueprint $table): void {
             $table->ulid('id')->primary();
             $table->foreignUlid('consultancy_id')->constrained()->cascadeOnDelete();
