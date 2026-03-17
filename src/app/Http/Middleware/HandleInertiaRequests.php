@@ -44,6 +44,9 @@ class HandleInertiaRequests extends Middleware
             'activeCompany' => $activeCompanyId
                 ? ClientCompany::withoutGlobalScopes()->find($activeCompanyId, ['id', 'name', 'tax_id'])
                 : null,
+            'flash' => [
+                'import_result' => fn () => $request->session()->get('import_result'),
+            ],
         ];
     }
 }

@@ -10,6 +10,7 @@ export default function Authenticated({
 }: PropsWithChildren<{ header?: ReactNode }>) {
     const { auth, activeCompany } = usePage().props;
     const user = auth.user;
+    const isSuperAdmin = user.role === 'superadmin';
 
     const [showingNavigationDropdown, setShowingNavigationDropdown] =
         useState(false);
@@ -21,23 +22,50 @@ export default function Authenticated({
                     <div className="flex h-16 justify-between">
                         <div className="flex">
                             <div className="flex shrink-0 items-center">
-                                <Link href={route('invoices.index')}>
+                                <Link href={route(isSuperAdmin ? 'consultancies.index' : 'invoices.index')}>
                                     <img src="/logo.png" alt="Logo" className="h-20 w-auto" />
                                 </Link>
                             </div>
 
                             <div className="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                                <NavLink
-                                    href={route('invoices.index')}
-                                    active={route().current('invoices.index')}
-                                >
-                                    Facturas
-                                </NavLink>
+                                {isSuperAdmin ? (
+                                    <>
+                                        <NavLink
+                                            href={route('consultancies.index')}
+                                            active={route().current('consultancies.*')}
+                                        >
+                                            Asesorías
+                                        </NavLink>
+                                        <NavLink
+                                            href={route('users.index')}
+                                            active={route().current('users.*')}
+                                        >
+                                            Usuarios
+                                        </NavLink>
+                                    </>
+                                ) : (
+                                    <>
+                                        <NavLink
+                                            href={route('invoices.index')}
+                                            active={route().current('invoices.index')}
+                                        >
+                                            Facturas
+                                        </NavLink>
+                                        {user.role === 'admin' && (
+                                            <NavLink
+                                                href={route('client-companies.index')}
+                                                active={route().current('client-companies.*')}
+                                            >
+                                                Empresas
+                                            </NavLink>
+                                        )}
+                                    </>
+                                )}
                             </div>
                         </div>
 
                         <div className="hidden sm:ms-6 sm:flex sm:items-center gap-4">
-                            {activeCompany && (
+                            {!isSuperAdmin && activeCompany && (
                                 <Link
                                     href={route('context.select')}
                                     className="flex items-center gap-2 rounded-full bg-indigo-50 px-3 py-1.5 text-sm text-indigo-700 hover:bg-indigo-100"
@@ -142,12 +170,39 @@ export default function Authenticated({
                     }
                 >
                     <div className="space-y-1 pb-3 pt-2">
-                        <ResponsiveNavLink
-                            href={route('invoices.index')}
-                            active={route().current('invoices.index')}
-                        >
-                            Facturas
-                        </ResponsiveNavLink>
+                        {isSuperAdmin ? (
+                            <>
+                                <ResponsiveNavLink
+                                    href={route('consultancies.index')}
+                                    active={route().current('consultancies.*')}
+                                >
+                                    Asesorías
+                                </ResponsiveNavLink>
+                                <ResponsiveNavLink
+                                    href={route('users.index')}
+                                    active={route().current('users.*')}
+                                >
+                                    Usuarios
+                                </ResponsiveNavLink>
+                            </>
+                        ) : (
+                            <>
+                                <ResponsiveNavLink
+                                    href={route('invoices.index')}
+                                    active={route().current('invoices.index')}
+                                >
+                                    Facturas
+                                </ResponsiveNavLink>
+                                {user.role === 'admin' && (
+                                    <ResponsiveNavLink
+                                        href={route('client-companies.index')}
+                                        active={route().current('client-companies.*')}
+                                    >
+                                        Empresas
+                                    </ResponsiveNavLink>
+                                )}
+                            </>
+                        )}
                     </div>
 
                     <div className="border-t border-gray-200 pb-1 pt-4">
@@ -158,7 +213,7 @@ export default function Authenticated({
                             <div className="text-sm font-medium text-gray-500">
                                 {user.email}
                             </div>
-                            {activeCompany && (
+                            {!isSuperAdmin && activeCompany && (
                                 <div className="mt-1 text-sm font-medium text-indigo-600">
                                     {activeCompany.name}
                                 </div>

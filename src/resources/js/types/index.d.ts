@@ -14,6 +14,7 @@ export interface Consultancy {
     tax_id: string;
     active: boolean;
     created_at: string;
+    users?: User[];
 }
 
 export interface User {
@@ -26,6 +27,11 @@ export interface User {
     consultancy?: Consultancy;
 }
 
+export interface ImportResult {
+    created: { name: string; tax_id: string }[];
+    skipped: { name: string; tax_id: string }[];
+}
+
 export type PageProps<
     T extends Record<string, unknown> = Record<string, unknown>,
 > = T & {
@@ -33,6 +39,9 @@ export type PageProps<
         user: User;
     };
     activeCompany: Pick<ClientCompany, 'id' | 'name' | 'tax_id'> | null;
+    flash: {
+        import_result?: ImportResult;
+    };
 };
 
 export interface PaginatedData<T> {

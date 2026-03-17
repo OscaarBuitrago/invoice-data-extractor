@@ -18,7 +18,11 @@ class ConsultancyController extends Controller
     {
         $this->authorize('viewAny', Consultancy::class);
 
-        $consultancies = Consultancy::withoutGlobalScopes()->paginate(25);
+        $consultancies = Consultancy::withoutGlobalScopes()
+            ->with(['users' => fn ($q) => $q->whereIn('role', ['admin', 'consultant'])
+                ->orderBy('role')
+                ->orderBy('name')])
+            ->paginate(25);
 
         return Inertia::render('Consultancies/Index', [
             'consultancies' => $consultancies,

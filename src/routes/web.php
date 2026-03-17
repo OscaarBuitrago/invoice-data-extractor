@@ -28,6 +28,9 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::get('/dashboard', function () {
+    if (auth()->user()->isSuperAdmin()) {
+        return redirect()->route('consultancies.index');
+    }
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified', RequiresCompanyContext::class])->name('dashboard');
 
@@ -39,6 +42,7 @@ Route::middleware('auth')->group(function () {
     Route::resource('consultancies', ConsultancyController::class)->only(['index', 'create', 'store']);
     Route::resource('users', UserController::class)->only(['index', 'create', 'store', 'edit', 'update']);
     Route::resource('client-companies', ClientCompanyController::class)->only(['index', 'create', 'store']);
+    Route::post('/client-companies/import', [ClientCompanyController::class, 'import'])->name('client-companies.import');
 
     Route::middleware(RequiresCompanyContext::class)->group(function (): void {
         Route::post('/sage-exports', [SageExportController::class, 'store'])->name('sage-exports.store');

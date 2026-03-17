@@ -39,9 +39,21 @@ class UserController extends Controller
             ? Consultancy::withoutGlobalScopes()->get(['id', 'name'])
             : collect();
 
+        $roles = collect(UserRole::cases())
+            ->filter(fn ($role) => $role !== UserRole::SuperAdmin)
+            ->map(fn ($role) => [
+                'value' => $role->value,
+                'label' => match ($role) {
+                    UserRole::Admin => 'Admin',
+                    UserRole::Consultant => 'Consultor',
+                    default => $role->value,
+                },
+            ])
+            ->values();
+
         return Inertia::render('Users/Create', [
             'consultancies' => $consultancies,
-            'roles' => UserRole::cases(),
+            'roles' => $roles,
         ]);
     }
 
@@ -56,9 +68,21 @@ class UserController extends Controller
     {
         $this->authorize('update', $user);
 
+        $roles = collect(UserRole::cases())
+            ->filter(fn ($role) => $role !== UserRole::SuperAdmin)
+            ->map(fn ($role) => [
+                'value' => $role->value,
+                'label' => match ($role) {
+                    UserRole::Admin => 'Admin',
+                    UserRole::Consultant => 'Consultor',
+                    default => $role->value,
+                },
+            ])
+            ->values();
+
         return Inertia::render('Users/Edit', [
             'user' => $user,
-            'roles' => UserRole::cases(),
+            'roles' => $roles,
         ]);
     }
 
