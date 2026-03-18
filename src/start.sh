@@ -7,4 +7,5 @@ php artisan db:seed --class=MaturanaPLCSeeder --force
 php artisan config:cache
 php artisan route:cache
 php artisan view:cache
+php artisan queue:work --tries=3 --timeout=120 &
 php artisan serve --host=0.0.0.0 --port=$PORT
